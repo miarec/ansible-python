@@ -1,0 +1,31 @@
+---
+## Installation options
+python_version: 3.5.3
+python_download_url: "https://www.python.org/ftp/python/{{ python_version }}/{{ python_download_pkg_name }}.tgz"
+
+# Set this to true to validate python tarball GPG signature against known keys in vars/main.yml
+# If enabled, then the *.tgz.asc file is automatically downloaded and passed to "gpg --verify" command
+python_verify_gpg_signature: true
+
+python_install_dir: /usr/local
+
+# Translate full python_version (3.4.5) to the MAJOR.MINOR value, like "3.4"
+python_version_base: {{ python_version|regex_replace('(\\d+\\.\\d+)\\..*$', '\\\\1') }}
+
+python_exec: "python{{ python_version_base }}"
+
+python_download_dir: /tmp
+python_download_pkg_name: "Python-{{ python_version }}"
+python_src_dir_path: "{{ python_download_dir }}/{{ python_download_pkg_name }}"
+python_src_pkg_path: "{{ python_download_dir }}/{{ python_download_pkg_name }}.tgz"
+
+
+
+# whether or not to delete the downloaded source code. By setting it
+# to false and using a custom var for `python_download_dir` a kind of
+# local caching can be achieved.
+python_cleanup_downloads: yes
+
+# If true, the python source for the version will be downloaded and
+# installed again even if it's found on the system.
+python_force_install: no

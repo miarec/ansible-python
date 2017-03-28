@@ -1,0 +1,98 @@
+---
+- name: Check python signing key for the requested version
+  fail:
+    msg: >
+      There is no GPG key id defined for version {{ python_version_base }} in
+      vars/main.yml. Set python_gpg_key_id manually or submit a PR to add this
+      version.
+  when:
+    - python_verify_gpg_signature|bool
+    - python_gpg_key_id is not defined
+    - python_version_base not in python_gpg_keys
+
+
+- name: Set python signing key id var
+  set_fact:
+    python_gpg_key_id: "{{ python_gpg_keys[python_base_version] }}"
+  when:
+    - python_verify_gpg_signature|bool
+    - python_gpg_key_id is not defined
+    - python_version_base in python_gpg_keys
+
+
+- name: Check if python signing key is imported to GPG
+  command: gpg --fingerprint {{ python_gpg_key_id }}
+  register: gpg_key_imported
+  ignore_errors: True
+  when:
+    - python_verify_gpg_signature|bool
+
+
+- name: Download python signing key and import to GPG
+  command: gpg --keyserver ha.pool.sks-keyservers.net --recv-keys {{ python_gpg_key_id }}
+  when:
+    - python_verify_gpg_signature|bool
+    - gpg_key_imported|failed
+
+
+- name: Download python source code
+  get_url:
+    url: "{{ python_download_url }}"
+    dest: "{{ python_src_pkg_path }}"
+
+
+- name: Download python tarbal signature
+  get_url:
+    url: "{{ python_download_url }}.asc"
+    dest: "{{ python_src_pkg_path }}.asc"
+  when:
+    - python_verify_gpg_signature|bool
+
+
+- name: Verify signature of the python tarball
+  command: gpg --verify {{ python_src_pkg_path }}.asc {{ python_src_pkg_path }}.asc
+  register: signature_verified
+  when:
+    - python_verify_gpg_signature|bool
+
+- name: Assert that the tarball signature is verified
+  assert:
+    that: "signature_verified.rc == 0"
+  when:
+    - python_verify_gpg_signature|bool
+
+
+- name: Untar the source package
+  unarchive:
+    src: "{{ python_src_pkg_path }}"
+    dest: "{{ python_download_dir }}"
+    creates: "{{ python_src_dir_path }}/configure"
+    copy: no
+
+
+- name: Run configure
+  command: ./configure --enable-shared --prefix={{ python_install_dir }}
+  args:
+    chdir: "{{ python_src_dir_path }}"
+    creates: "{{ python_src_dir_path }}/Makefile"
+
+
+- name: Run make
+  command: make -j{{ ansible_processor_cores + 1 }}
+  args:
+    chdir: "{{ python_src_dir_path }}"
+    creates: "{{ python_src_dir_path }}/python"
+
+
+- name: Run make altinstall
+  command: make altinstall
+  args:
+    chdir: "{{ python_src_dir_path }}"
+    creates: "{{ python_install_dir }}/bin/{{ python_exec }}"
+
+
+- name: Add {{ python_install_dir }}/lib directory to ld.so.conf
+  lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
+  notify:
+    - reload ldconfig
+

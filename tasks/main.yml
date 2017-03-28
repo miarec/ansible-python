@@ -1,0 +1,16 @@
+---
+
+- name: check if python version installed
+  command: "which {{ python_exec }}"
+  register: python_exists
+  ignore_errors: yes
+
+- include: dependencies.yml
+  tags:
+    - install
+  when: python_force_install or python_exists.rc != 0
+
+- include: install.yml
+  tags:
+    - install
+  when: python_force_install or python_exists.rc != 0
