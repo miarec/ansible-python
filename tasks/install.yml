@@ -71,7 +71,7 @@
 
 
 - name: Run configure
-  command: ./configure --enable-shared --prefix={{ python_install_dir }}
+  command: ./configure --enable-shared --prefix={{ python_install_dir }} LDFLAGS="-Wl,-rpath {{ python_install_dir}}/lib"
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/Makefile"
@@ -89,6 +89,14 @@
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_install_dir }}/bin/{{ python_exec }}"
+  when: not python_force_install
+
+- name: Run make altinstall | Force
+  command: make altinstall
+  args:
+    chdir: "{{ python_src_dir_path }}"
+  when: python_force_install
+
 
 
 - name: Add {{ python_install_dir }}/lib directory to ld.so.conf
@@ -102,5 +110,5 @@
     - "{{ python_src_pkg_path }}"
     - "{{ python_src_pkg_path }}.asc"
     - "{{ python_src_dir_path }}"
-  when: python_cleanup_downloads      
+  when: python_cleanup_downloads|bool
 
