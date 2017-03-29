@@ -1,5 +1,5 @@
 ---
-- name: Check python signing key for the requested version
+- name: Check python signing key for the requested version {{ python_version_base }}
   fail:
     msg: >
       There is no GPG key id defined for version {{ python_version_base }} in
@@ -11,9 +11,9 @@
     - python_version_base not in python_gpg_keys
 
 
-- name: Set python signing key id var
+- name: Set python signing key for version {{ python_version_base }}
   set_fact:
-    python_gpg_key_id: "{{ python_gpg_keys[python_base_version] }}"
+    python_gpg_key_id: "{{ python_gpg_keys[python_version_base] }}"
   when:
     - python_verify_gpg_signature|bool
     - python_gpg_key_id is not defined
@@ -50,7 +50,7 @@
 
 
 - name: Verify signature of the python tarball
-  command: gpg --verify {{ python_src_pkg_path }}.asc {{ python_src_pkg_path }}.asc
+  command: gpg --verify {{ python_src_pkg_path }}.asc {{ python_src_pkg_path }}
   register: signature_verified
   when:
     - python_verify_gpg_signature|bool
@@ -95,4 +95,12 @@
   lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
   notify:
     - reload ldconfig
+
+- name: Clean up the source files
+  command: rm -r "{{ item }}"
+  with_items:
+    - "{{ python_src_pkg_path }}"
+    - "{{ python_src_pkg_path }}.asc"
+    - "{{ python_src_dir_path }}"
+  when: python_cleanup_downloads      
 
