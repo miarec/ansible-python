@@ -21,7 +21,7 @@
 
 
 - include: dependencies.yml
-  when: python_force_install or python_exists.rc != 0
+  when: python_force_install|bool or python_exists.rc != 0
 
 - include: install.yml
-  when: python_force_install or python_exists.rc != 0
+  when: python_force_install|bool or python_exists.rc != 0

@@ -89,13 +89,13 @@
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_install_dir }}/bin/{{ python_exec }}"
-  when: not python_force_install
+  when: not python_force_install|bool
 
 - name: Run make altinstall | Force
   command: make altinstall
   args:
     chdir: "{{ python_src_dir_path }}"
-  when: python_force_install
+  when: python_force_install|bool
 
 
 
