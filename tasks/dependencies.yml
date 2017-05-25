@@ -10,6 +10,7 @@
     - make
     - libssl-dev
     - libsqlite3-dev
+    - libbz2-dev
   when: ansible_os_family == "Debian"
 
 - name: install dependencies | RedHat
@@ -21,6 +22,7 @@
     - make
     - openssl-devel
     - sqlite-devel
+    - bzip2-devel
   when: ansible_os_family == "RedHat"
 
 - name: Install GnuPG
