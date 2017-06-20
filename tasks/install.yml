@@ -90,14 +90,18 @@
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_install_dir }}/bin/{{ python_exec }}"
   when: not python_force_install|bool
+  notify:
+    - reload ldconfig
 
+    
 - name: Run make altinstall | Force
   command: make altinstall
   args:
     chdir: "{{ python_src_dir_path }}"
   when: python_force_install|bool
-
-
+  notify:
+    - reload ldconfig
+    
 
 - name: Add {{ python_install_dir }}/lib directory to ld.so.conf
   lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
