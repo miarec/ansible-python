@@ -92,6 +92,7 @@
   when: not python_force_install|bool
   notify:
     - reload ldconfig
+  become: yes
 
     
 - name: Run make altinstall | Force
@@ -101,12 +102,14 @@
   when: python_force_install|bool
   notify:
     - reload ldconfig
+  become: yes
     
 
 - name: Add {{ python_install_dir }}/lib directory to ld.so.conf
   lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
   notify:
     - reload ldconfig
+  become: yes
 
 - name: Clean up the source files
   file: 
@@ -118,4 +121,5 @@
     - "{{ python_src_dir_path }}"
   # ignore_errors: True
   when: python_cleanup_downloads|bool
+  become: yes
 
