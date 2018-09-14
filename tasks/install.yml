@@ -27,9 +27,15 @@
   when:
     - python_verify_gpg_signature|bool
 
+    
+- name: Copy python signing key
+  copy:
+    src: "files/{{ python_gpg_key_id }}.key"
+    dest: "{{ python_download_dir }}/{{ python_gpg_key_id }}.key"
+    
 
-- name: Download python signing key and import to GPG
-  command: gpg --keyserver ha.pool.sks-keyservers.net --recv-keys {{ python_gpg_key_id }}
+- name: Import python signing key into GPG
+  command: "gpg --import {{ python_download_dir }}/{{ python_gpg_key_id }}.key"
   when:
     - python_verify_gpg_signature|bool
     - gpg_key_imported|failed
