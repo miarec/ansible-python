@@ -38,7 +38,7 @@
   command: "gpg --import {{ python_download_dir }}/{{ python_gpg_key_id }}.key"
   when:
     - python_verify_gpg_signature|bool
-    - gpg_key_imported|failed
+    - gpg_key_imported is failed
 
 
 - name: Download python source code
