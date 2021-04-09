@@ -20,9 +20,10 @@
     - python_version_base in python_gpg_keys
 
 
-- name: Check if python signing key is imported to GPG
+- name: Check if python signing key is imported to GPG (ignore errors)
   command: gpg --fingerprint {{ python_gpg_key_id }}
   register: gpg_key_imported
+  failed_when: False
   ignore_errors: True
   when:
     - python_verify_gpg_signature|bool
@@ -38,7 +39,7 @@
   command: "gpg --import {{ python_download_dir }}/{{ python_gpg_key_id }}.key"
   when:
     - python_verify_gpg_signature|bool
-    - gpg_key_imported is failed
+    - gpg_key_imported.rc != 0
 
 
 - name: Download python source code

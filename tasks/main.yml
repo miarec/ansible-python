@@ -16,6 +16,7 @@
 - name: check if python version {{ python_version }} installed
   command: "which {{ python_install_dir }}/bin/{{ python_exec }}"
   register: python_exists
+  failed_when: False
   ignore_errors: yes
   changed_when: False
 
