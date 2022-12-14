@@ -1,0 +1,25 @@
+- name: Converge
+  hosts: all
+  become: true
+
+  pre_tasks:
+    - name: Install prerequisites
+      block:
+        - name: Update apt cache
+          apt:
+            update_cache: true
+            cache_valid_time: 600
+          changed_when: false
+          when: ansible_os_family == "Debian"
+
+      tags:
+        - prereqs
+    - set_fact:
+        python_verify_gpg_signature: true
+        python_cleanup_downloads: true
+        python_force_install: false
+
+  roles:
+    - role: ansible-python
+      tags:
+        - python
