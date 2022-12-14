@@ -1,3 +1,4 @@
+---
 - name: Converge
   hosts: all
   become: true
@@ -15,6 +16,7 @@
       tags:
         - prereqs
     - set_fact:
+        python_version: 3.6.10
         python_verify_gpg_signature: true
         python_cleanup_downloads: true
         python_force_install: false

@@ -23,17 +23,17 @@
 - name: Check if python signing key is imported to GPG (ignore errors)
   command: gpg --fingerprint {{ python_gpg_key_id }}
   register: gpg_key_imported
-  failed_when: False
-  ignore_errors: True
+  failed_when: false
+  ignore_errors: true
   when:
     - python_verify_gpg_signature|bool
 
-    
+
 - name: Copy python signing key
   copy:
     src: "files/{{ python_gpg_key_id }}.key"
     dest: "{{ python_download_dir }}/{{ python_gpg_key_id }}.key"
-    
+
 
 - name: Import python signing key into GPG
   command: "gpg --import {{ python_download_dir }}/{{ python_gpg_key_id }}.key"
@@ -74,7 +74,7 @@
     src: "{{ python_src_pkg_path }}"
     dest: "{{ python_download_dir }}"
     creates: "{{ python_src_dir_path }}/configure"
-    copy: no
+    copy: false
 
 
 - name: Run configure
@@ -99,9 +99,9 @@
   when: not python_force_install|bool
   notify:
     - reload ldconfig
-  become: yes
+  become: true
 
-    
+
 - name: Run make altinstall | Force
   command: make altinstall
   args:
@@ -109,17 +109,17 @@
   when: python_force_install|bool
   notify:
     - reload ldconfig
-  become: yes
-    
+  become: true
+
 
 - name: Add {{ python_install_dir }}/lib directory to ld.so.conf
   lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
   notify:
     - reload ldconfig
-  become: yes
+  become: true
 
 - name: Clean up the source files
-  file: 
+  file:
     path: "{{ item }}"
     state: absent
   with_items:
@@ -128,5 +128,4 @@
     - "{{ python_src_dir_path }}"
   # ignore_errors: True
   when: python_cleanup_downloads|bool
-  become: yes
-
+  become: true

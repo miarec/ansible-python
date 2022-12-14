@@ -2,7 +2,7 @@
 - name: install dependencies | Debian
   package:
     pkg: "{{ item }}"
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 86400
     state: present
   with_items:
@@ -26,8 +26,7 @@
   when: ansible_os_family == "RedHat"
 
 - name: Install GnuPG
-  package: 
+  package:
     name: gnupg
     state: present
   when: python_verify_gpg_signature|bool
-
