@@ -6,7 +6,10 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_bin(host):
     bins = [
-        "{{ python_install_dir }}/bin/{{ python_exec }}"
+        "/usr/local/bin/python3.6",
+        "/usr/local/bin/python3.6m",
+        "/usr/local/bin/python3.6m-config",
+        "/usr/local/bin/pyvenv-3.6"
     ]
     for bin in bins:
         b = host.file(bin)
@@ -15,4 +18,8 @@ def test_bin(host):
 
 def test_command(host):
     # Run and check specific status codes in one step
-    host.run_expect([0], "sox --version")
+    host.run_test("python3.6 --version")
+
+    output = host.check_output("python3.6 --version")
+    assert '3.6.10' in output
+
