@@ -1,6 +1,6 @@
 ---
 ## Installation options
-python_version: 3.6.10
+python_version: 3.8.16
 
 # Set this to true to validate python tarball GPG signature against known keys in vars/main.yml
 # If enabled, then the *.tgz.asc file is automatically downloaded and passed to "gpg --verify" command

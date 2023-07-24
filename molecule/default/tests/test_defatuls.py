@@ -19,7 +19,7 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 def test_files(host):
     files = [
-        "/usr/local/bin/python3.6"
+        "/usr/local/bin/python3.8"
     ]
     for file in files:
         f = host.file(file)
