@@ -1,5 +1,5 @@
 # ansible-python
-![CI](https://github.com/miarec/ansible-role-grafana/actions/workflows/ci.yml/badge.svg?event=push)
+![CI](https://github.com/miarec/ansible-python/actions/workflows/ci.yml/badge.svg?event=push)
 
 Ansible role for installing a particular version of Python from source.
 
