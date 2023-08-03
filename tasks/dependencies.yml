@@ -25,6 +25,7 @@
     - openssl-devel
     - sqlite-devel
     - bzip2-devel
+    - libffi-devel
   when: ansible_os_family == "RedHat"
 
 - name: Install GnuPG
