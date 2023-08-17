@@ -7,7 +7,7 @@ Ansible role for installing a particular version of Python from source.
 Role Variables
 --------------
 
-- `python_version`: The version of python to install
+- `python_version`: (Optional) The version of python to install, if not specified, python3 will be install from package
 - `python_verify_gpg_signature`: If enabled, then GPG signature is verified for the downloaded tarball.
 - `python_gpg_key_id`: GPG key id used to sign python tarball, optional. The known keys are stored in vars/main.yml. You need to set this option only if the requested python version is not known yet.
 - `python_force_install`: Install again even if the specified version is already found

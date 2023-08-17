@@ -1,0 +1,7 @@
+---
+# Install python from package
+- name: Install Python3 packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ python3_packages }}"
