@@ -41,4 +41,3 @@
       when: python_force_install|bool or python_exists.rc != 0
 
   when: python_install_from_source
-
