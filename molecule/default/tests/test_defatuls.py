@@ -4,7 +4,7 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-python_version = os.environ.get('MOLECULE_PYTHON_VERSION', '3.8.16')
+python_version = os.environ.get('MOLECULE_PYTHON_VERSION')
 
 
 
