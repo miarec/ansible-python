@@ -5,7 +5,7 @@
 
   pre_tasks:
     - set_fact:
-        python_version: "{{ lookup('env', 'MOLECULE_PYTHON_VERSION')|default('3.8.16') }}"
+        python_version: "{{ lookup('env', 'MOLECULE_PYTHON_VERSION', default = '3.8.16') }}"
 
     - name: Install prerequisites
       block:
