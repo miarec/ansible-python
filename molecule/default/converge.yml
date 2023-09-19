@@ -5,6 +5,7 @@
 
   pre_tasks:
     - set_fact:
+        python_install_from_source: "{{ lookup('env', 'PYTHON_INSTALL_FROM_SOURCE') }}"
         python_version: "{{ lookup('env', 'PYTHON_VERSION') }}"
 
     - name: Install prerequisites

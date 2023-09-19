@@ -19,6 +19,7 @@ provisioner:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   env:
     PYTHON_VERSION: ${MOLECULE_PYTHON_VERSION:-3.8.16}
+    PYTHON_INSTALL_FROM_SOURCE: ${MOLECULE_PYTHON_INSTALL_FROM_SOURCE:-false}
 verifier:
   name: testinfra
   options:
