@@ -25,7 +25,7 @@ jobs:
           yamllint_config_filepath: '.yamllint'
 
   test1:
-    name: molecule - install from source
+    name: molecule(source)
     needs: lint
     runs-on: ubuntu-latest
     strategy:
@@ -63,7 +63,7 @@ jobs:
 
 
   test2:
-    name: molecule - install from package
+    name: molecule(package)
     needs: lint
     runs-on: ubuntu-latest
     strategy:

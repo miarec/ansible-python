@@ -17,3 +17,4 @@ MOLECULE_DISTRO=centos7 MOLECULE_PYTHON_VERSION=3.6.10 molecule test
     - `ubuntu2004`
     - `centos7`
  - `MOLECULE_PYTHON_VERSION` defines variable `python_version`, default `3.8.16`
+ - `MOLECULE_PYTHON_INSTALL_FROM_SOURCE` defines varaible `python_install_from_source`, default `false`

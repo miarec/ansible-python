@@ -9,13 +9,13 @@ python_install_from_source = os.environ.get('PYTHON_INSTALL_FROM_SOURCE')
 
 def test_files(host):
 
-    if python_install_from_source :
-        files = [
-            "/usr/bin/python3"
-        ]
-    else :
+    if python_install_from_source:
         files = [
             "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
+        ]
+    else:
+        files = [
+            "/usr/bin/python3"
         ]
 
 
