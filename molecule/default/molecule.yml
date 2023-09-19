@@ -17,6 +17,8 @@ provisioner:
   name: ansible
   playbooks:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
+  env:
+    PYTHON_VERSION: ${MOLECULE_PYTHON_VERSION:-3.8.16}
 verifier:
   name: testinfra
   options:
