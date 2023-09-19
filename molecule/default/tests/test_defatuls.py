@@ -6,15 +6,9 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 
 python_version = os.environ.get('PYTHON_VERSION')
 
-
-
 def test_files(host):
     files = [
-<<<<<<< HEAD
-        "/usr/bin/python3"
-=======
         "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
->>>>>>> 20230724-ubuntu
     ]
     for file in files:
         f = host.file(file)
