@@ -9,7 +9,7 @@ python_install_from_source = os.environ.get('PYTHON_INSTALL_FROM_SOURCE')
 
 def test_files(host):
 
-    if python_install_from_source:
+    if python_install_from_source == 'true':
         files = [
             "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
         ]
