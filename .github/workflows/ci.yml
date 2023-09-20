@@ -52,8 +52,8 @@ jobs:
       - name: Install Ansible dependencies.
         run: ansible-galaxy collection install community.docker ansible.posix --force
 
-      - name: Run molecule test, scenario install-from-source.
-        run: molecule test -s install-from-repo
+      - name: Run molecule test
+        run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
@@ -86,8 +86,8 @@ jobs:
       - name: Install Ansible dependencies.
         run: ansible-galaxy collection install community.docker ansible.posix --force
 
-      - name: Run molecule tests.
-        run: molecule test
+      - name: Run molecule tests., install from Package
+        run: molecule test -s install-from-repo
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
