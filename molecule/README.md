@@ -10,7 +10,7 @@ molecule test
 
 Run test with variable example
 ```
-MOLECULE_DISTRO=centos7 MOLECULE_PYTHON_VERSION=3.6.10 molecule test
+MOLECULE_DISTRO=centos7 molecule test
 ```
 
 ### Variables
