@@ -1,6 +1,6 @@
 ---
 ## Installation options
-python_install_from_source: false
+python_install_from_source: true
 python_version: 3.8.16
 
 # Set this to true to validate python tarball GPG signature against known keys in vars/main.yml
