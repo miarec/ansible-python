@@ -52,15 +52,13 @@ jobs:
       - name: Install Ansible dependencies.
         run: ansible-galaxy collection install community.docker ansible.posix --force
 
-      - name: Run molecule tests
-        run: molecule test
+      - name: Run molecule test, scenario install-from-source.
+        run: molecule test -s install-from-source
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
           MOLECULE_PYTHON_VERSION: ${{ matrix.version }}
-          MOLECULE_PYTHON_INSTALL_FROM_SOURCE: true
-
 
   test2:
     name: molecule(package)
@@ -74,25 +72,23 @@ jobs:
           - centos7
 
     steps:
-      - name: Check out the Repository
+      - name: Check out the Repository.
         uses: actions/checkout@v4
 
-      - name: Set up Python3
+      - name: Set up Python3.
         uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
-      - name: Install test dependencies
+      - name: Install test dependencies.
         run: pip3 install -r molecule/default/test-requirements.txt
 
       - name: Install Ansible dependencies.
         run: ansible-galaxy collection install community.docker ansible.posix --force
 
-      - name: Run molecule tests
+      - name: Run molecule tests.
         run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
-          MOLECULE_PYTHON_VERSION: ${{ matrix.version }}
-          MOLECULE_PYTHON_INSTALL_FROM_SOURCE: false

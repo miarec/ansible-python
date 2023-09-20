@@ -4,9 +4,11 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
+python_version = os.environ.get('PYTHON_VERSION')
+
 def test_files(host):
     files = [
-        "/usr/bin/python3"
+        "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
     ]
 
     for file in files:
@@ -14,20 +16,27 @@ def test_files(host):
         assert f.exists
         assert f.is_file
 
+
 def test_packages(host):
     if host.system_info.distribution == "ubuntu":
         packages = [
-            "python3",
-            "python3-dev",
-            "python3-venv"
+            "gcc",
+            "make",
+            "libssl-dev",
+            "libsqlite3-dev",
+            "libbz2-dev",
+            "libffi-dev",
+            "python3-pip"
         ]
 
     if host.system_info.distribution == "centos":
         packages = [
-            "epel-release",
-            "python3",
-            "python3-devel",
-            "python36-virtualenv"
+            "gcc",
+            "make",
+            "openssl-devel",
+            "sqlite-devel",
+            "bzip2-devel",
+            "libffi-devel"
         ]
 
     for package in packages :
