@@ -4,7 +4,7 @@ python_gpg_keys:
   #  gpg: key 36580288: public key "Georg Brandl (Python release signing key) <georg@python.org>" imported
   # https://www.python.org/dev/peps/pep-0398/#release-manager-and-crew
   "3.3": 26DEA9D4613391EF3E25C9FF0A5B101836580288
-  
+
   # gpg: key F73C700D: public key "Larry Hastings <larry@hastings.org>" imported
   # https://www.python.org/dev/peps/pep-0429/#release-manager-and-crew
   "3.4": 97FC712E4C024BBEA48A61ED3A5CA953F73C700D
@@ -17,3 +17,27 @@ python_gpg_keys:
   # https://www.python.org/dev/peps/pep-0494/#release-manager-and-crew
   "3.6": 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
 
+  # gpg: key AA65421D: public key "Ned Deily (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.7": 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+
+  # gpg: key B269 95E3 1025 0568: public key "Lukasz Langa (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.8": E3FF2839C048B25C084DEBE9B26995E310250568
+
+  # gpg: key B269 95E3 1025 0568: public key "Lukasz Langa (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.9": E3FF2839C048B25C084DEBE9B26995E310250568
+
+  # gpg: key 64E628F8D684696D: public key "Pablo Galindo Salgado (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.10": A035C8C19219BA821ECEA86B64E628F8D684696D
+
+  # gpg: key 64E628F8D684696D: public key "Pablo Galindo Salgado (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.11": A035C8C19219BA821ECEA86B64E628F8D684696D
+
+  # NOTE: 3.12 at time of testing is still in prerelease and not available for download
+  # gpg: key A821E680E5FA6305): public key "Thomas Wouters (Python release signing key) <nad@acm.org>" imported
+  # https://python.org/downloads/
+  "3.12": YHG1S

@@ -2,7 +2,7 @@
 - name: install dependencies | Debian
   package:
     pkg: "{{ item }}"
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 86400
     state: present
   with_items:
@@ -11,6 +11,8 @@
     - libssl-dev
     - libsqlite3-dev
     - libbz2-dev
+    - libffi-dev
+    - python3-pip
   when: ansible_os_family == "Debian"
 
 - name: install dependencies | RedHat
@@ -23,11 +25,11 @@
     - openssl-devel
     - sqlite-devel
     - bzip2-devel
+    - libffi-devel
   when: ansible_os_family == "RedHat"
 
 - name: Install GnuPG
-  package: 
+  package:
     name: gnupg
     state: present
   when: python_verify_gpg_signature|bool
-

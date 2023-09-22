@@ -16,14 +16,14 @@
 - name: check if python version {{ python_version }} installed
   command: "which {{ python_install_dir }}/bin/{{ python_exec }}"
   register: python_exists
-  failed_when: False
-  ignore_errors: yes
-  changed_when: False
+  failed_when: false
+  ignore_errors: true
+  changed_when: false
 
 
 - include: dependencies.yml
   when: python_force_install|bool or python_exists.rc != 0
-  become: yes
+  become: true
 
 - include: install.yml
   when: python_force_install|bool or python_exists.rc != 0
