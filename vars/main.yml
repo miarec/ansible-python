@@ -18,27 +18,26 @@ python_gpg_keys:
   "3.6": 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
 
   # gpg: key AA65421D: public key "Ned Deily (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.7": 0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
 
   # gpg: key B269 95E3 1025 0568: public key "Lukasz Langa (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.8": E3FF2839C048B25C084DEBE9B26995E310250568
 
   # gpg: key B269 95E3 1025 0568: public key "Lukasz Langa (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.9": E3FF2839C048B25C084DEBE9B26995E310250568
 
   # gpg: key 64E628F8D684696D: public key "Pablo Galindo Salgado (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.10": A035C8C19219BA821ECEA86B64E628F8D684696D
 
-
   # gpg: key 64E628F8D684696D: public key "Pablo Galindo Salgado (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.11": A035C8C19219BA821ECEA86B64E628F8D684696D
 
-  # >>>>>>>>>>   3.12 at time of testing is still in prerelease and not available for download
+  # NOTE: 3.12 at time of testing is still in prerelease and not available for download
   # gpg: key A821E680E5FA6305): public key "Thomas Wouters (Python release signing key) <nad@acm.org>" imported
-  # https://python.domainunion.de/downloads/
+  # https://python.org/downloads/
   "3.12": YHG1S

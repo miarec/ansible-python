@@ -1,10 +1,13 @@
 import os
 import testinfra.utils.ansible_runner
 
+
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
-    os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
+    os.environ['MOLECULE_INVENTORY_FILE']
+).get_hosts('all')
 
 python_version = os.environ.get('PYTHON_VERSION')
+
 
 def test_files(host):
     files = [
