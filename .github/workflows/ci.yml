@@ -24,8 +24,8 @@ jobs:
           yamllint_comment: false
           yamllint_config_filepath: '.yamllint'
 
-  test:
-    name: molecule
+  test1:
+    name: molecule(source)
     needs: lint
     runs-on: ubuntu-latest
     strategy:
@@ -49,10 +49,46 @@ jobs:
       - name: Install test dependencies
         run: pip3 install -r molecule/default/test-requirements.txt
 
-      - name: Run molecule tests
+      - name: Install Ansible dependencies.
+        run: ansible-galaxy collection install community.docker ansible.posix --force
+
+      - name: Run molecule test
         run: molecule test
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
           MOLECULE_PYTHON_VERSION: ${{ matrix.version }}
+
+  test2:
+    name: molecule(package)
+    needs: lint
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        distro:
+          - ubuntu2004
+          - ubuntu2204
+          - centos7
+
+    steps:
+      - name: Check out the Repository.
+        uses: actions/checkout@v4
+
+      - name: Set up Python3.
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install test dependencies.
+        run: pip3 install -r molecule/default/test-requirements.txt
+
+      - name: Install Ansible dependencies.
+        run: ansible-galaxy collection install community.docker ansible.posix --force
+
+      - name: Run molecule tests., install from Package
+        run: molecule test -s install-from-repo
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}

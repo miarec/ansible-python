@@ -1,0 +1,15 @@
+---
+- name: Install Python3 Dependencies
+  yum:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - epel-release
+  when: ansible_os_family == "RedHat"
+
+# Install python from package
+- name: Install Python3 packages
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ python3_packages }}"
