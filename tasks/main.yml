@@ -6,7 +6,7 @@
     - "../vars/{{ ansible_os_family }}.yml"
 
 # Install Python3 from package
-- include: install-package.yml
+- include_tasks: install-package.yml
   when: not python_install_from_source
 
 # Install Python3 from Source code
@@ -33,11 +33,10 @@
       ignore_errors: true
       changed_when: false
 
-    - include: dependencies.yml
+    - include_tasks: dependencies.yml
       when: python_force_install|bool or python_exists.rc != 0
-      become: true
 
-    - include: install-source.yml
+    - include_tasks: install-source.yml
       when: python_force_install|bool or python_exists.rc != 0
 
   when: python_install_from_source

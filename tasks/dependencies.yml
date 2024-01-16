@@ -14,6 +14,7 @@
     - libffi-dev
     - python3-pip
   when: ansible_os_family == "Debian"
+  become: true
 
 - name: install dependencies | RedHat
   package:
@@ -27,9 +28,11 @@
     - bzip2-devel
     - libffi-devel
   when: ansible_os_family == "RedHat"
+  become: true
 
 - name: Install GnuPG
   package:
     name: gnupg
     state: present
   when: python_verify_gpg_signature|bool
+  become: true
