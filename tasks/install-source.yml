@@ -76,16 +76,60 @@
     creates: "{{ python_src_dir_path }}/configure"
     copy: false
 
-
-- name: Run configure
-  command: ./configure --enable-shared --prefix={{ python_install_dir }} LDFLAGS="-Wl,-rpath {{ python_install_dir}}/lib"
+- name: Run configure (Debian)
+  command: ./configure --enable-optimizations --enable-shared --prefix={{ python_install_dir }}
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/Makefile"
+  environment:
+    LDFLAGS: "-Wl,-rpath {{ python_install_dir}}/lib"
+  when: 
+    - ansible_os_family == "Debian"
+
+# TODO: right now, only version 7 of RedHat/Centos is supported
+# In future, update this code to support release 8+
+- name: Run configure (RedHat, Python 3.10+)
+  block:
+    - name: Get openssl11 location
+      shell: pkg-config --cflags openssl11
+      register: openssl11_cflags
+
+    - name: Get openssl11 location
+      shell: pkg-config --libs openssl11
+      register: openssl11_libs
+
+    # Note, on Centos 7, due to old version of GCC, we cannot use --enable-optimizations option
+    # TODO: try to install devtoolset-11-gcc* and compile with a newer GCC
+    - name: Run configure
+      command: ./configure --enable-shared --prefix={{ python_install_dir }}
+      args:
+        chdir: "{{ python_src_dir_path }}"
+        creates: "{{ python_src_dir_path }}/Makefile"
+
+      environment:
+        CPPFLAGS: "{{ openssl11_cflags.stdout }}"
+        LDFLAGS: "{{ openssl11_libs.stdout }} -Wl,-rpath {{ python_install_dir}}/lib"
+      
+  when: 
+    - ansible_os_family == "RedHat"
+    - python_version is version('3.10', '>=')
+    # - ansible_distribution_major_version is version('7', '<=')
+      
+- name: Run configure (RedHat, Python 3.9 and older)
+  command: ./configure --enable-shared --prefix={{ python_install_dir }}
+  args:
+    chdir: "{{ python_src_dir_path }}"
+    creates: "{{ python_src_dir_path }}/Makefile"
+  environment:
+    LDFLAGS: "-Wl,-rpath {{ python_install_dir}}/lib"
+  when:
+    - ansible_os_family == "RedHat"
+    - python_version is version('3.9', '<=')
+    # - (ansible_distribution_major_version is version('7', '>') or python_version is version('3.9', '<='))
 
 
 - name: Run make
-  command: make -j{{ ansible_processor_cores + 1 }}
+  command: make -j{{ ansible_processor_cores }}
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/python"
