@@ -30,6 +30,17 @@
   when: ansible_os_family == "RedHat"
   become: true
 
+- name: install openssl 1.1 | RedHat
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - openssl11-devel
+  when: 
+    - ansible_os_family == "RedHat"
+    - python_version is version('3.10', '>=')
+  become: true
+
 - name: Install GnuPG
   package:
     name: gnupg
