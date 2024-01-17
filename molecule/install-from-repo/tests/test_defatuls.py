@@ -4,32 +4,17 @@ import testinfra.utils.ansible_runner
 testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
     os.environ['MOLECULE_INVENTORY_FILE']).get_hosts('all')
 
-def test_files(host):
-    files = [
-        "/usr/bin/python3"
-    ]
+python_bin_path = "/usr/bin/python3"
 
-    for file in files:
-        f = host.file(file)
-        assert f.exists
-        assert f.is_file
 
-def test_packages(host):
-    if host.system_info.distribution == "ubuntu":
-        packages = [
-            "python3",
-            "python3-dev",
-            "python3-venv"
-        ]
+def test_python(host):
+    assert host.run(f'{python_bin_path} --version').rc == 0, "Python binary should run"
 
-    if host.system_info.distribution == "centos":
-        packages = [
-            "epel-release",
-            "python3",
-            "python3-devel",
-            "python36-virtualenv"
-        ]
+def test_python_ssl(host):
+    assert host.run(f'{python_bin_path} -c "import ssl"').rc == 0, "Python must be compiled with ssl"
 
-    for package in packages :
-        p = host.package(package)
-        assert p.is_installed
+def test_python_sqlite3(host):
+    assert host.run(f'{python_bin_path} -c "import sqlite3"').rc == 0, "Python must be compiled with sqlite3"
+
+def test_python_bz2(host):
+    assert host.run(f'{python_bin_path} -c "import bz2"').rc == 0, "Python must be compiled with bz2"

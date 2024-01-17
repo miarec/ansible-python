@@ -7,41 +7,18 @@ testinfra_hosts = testinfra.utils.ansible_runner.AnsibleRunner(
 ).get_hosts('all')
 
 python_version = os.environ.get('PYTHON_VERSION')
+python_bin_path = "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
 
 
-def test_files(host):
-    files = [
-        "/usr/local/bin/python{}".format(".".join(python_version.split('.')[:2]))
-    ]
-
-    for file in files:
-        f = host.file(file)
-        assert f.exists
-        assert f.is_file
+def test_python(host):
+    assert host.run(f'{python_bin_path} --version').rc == 0, "Python binary should run"
 
 
-def test_packages(host):
-    if host.system_info.distribution == "ubuntu":
-        packages = [
-            "gcc",
-            "make",
-            "libssl-dev",
-            "libsqlite3-dev",
-            "libbz2-dev",
-            "libffi-dev",
-            "python3-pip"
-        ]
+def test_python_ssl(host):
+    assert host.run(f'{python_bin_path} -c "import ssl"').rc == 0, "Python must be compiled with ssl"
 
-    if host.system_info.distribution == "centos":
-        packages = [
-            "gcc",
-            "make",
-            "openssl-devel",
-            "sqlite-devel",
-            "bzip2-devel",
-            "libffi-devel"
-        ]
+def test_python_sqlite3(host):
+    assert host.run(f'{python_bin_path} -c "import sqlite3"').rc == 0, "Python must be compiled with sqlite3"
 
-    for package in packages :
-        p = host.package(package)
-        assert p.is_installed
+def test_python_bz2(host):
+    assert host.run(f'{python_bin_path} -c "import bz2"').rc == 0, "Python must be compiled with bz2"
