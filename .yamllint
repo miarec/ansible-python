@@ -2,6 +2,7 @@
 extends: default
 
 rules:
+  trailing-spaces: disable
   line-length:
     max: 180
     level: warning
