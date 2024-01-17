@@ -1,4 +1,71 @@
 ---
+- name: Install build dependencies | Debian
+  package:
+    pkg: "{{ item }}"
+    update_cache: true
+    cache_valid_time: 86400
+    state: present
+  with_items:
+    - gcc
+    - make
+    - libssl-dev
+    - libsqlite3-dev
+    - libbz2-dev
+    - libffi-dev
+    - python3-pip
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Install build dependencies (default) | RedHat
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - make
+    - openssl-devel
+    - sqlite-devel
+    - bzip2-devel
+    - libffi-devel
+  when: ansible_os_family == "RedHat"
+  become: true
+
+- name: Install build dependencies (Python 3.10+) | RedHat
+  block:
+
+    - name: install RedHat Software Collections (SCL)
+      package:
+        name: centos-release-scl
+        state: present
+
+    - name: Install DevToolset | RedHat
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - devtoolset-11
+      become: true
+
+    - name: Install openssl 1.1 | RedHat
+      package:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - openssl11
+        - openssl11-devel
+      become: true
+
+  when: 
+    - ansible_os_family == "RedHat"
+    - python_version is version('3.10', '>=')
+
+
+- name: Install GnuPG
+  package:
+    name: gnupg
+    state: present
+  when: python_verify_gpg_signature|bool
+  become: true
 - name: Check python signing key for the requested version {{ python_version_base }}
   fail:
     msg: >
@@ -86,6 +153,15 @@
   when: 
     - ansible_os_family == "Debian"
 
+- name: Run make | Debian
+  command: make -j{{ ansible_processor_cores }}
+  args:
+    chdir: "{{ python_src_dir_path }}"
+    creates: "{{ python_src_dir_path }}/python"
+  when: 
+    - ansible_os_family == "Debian"
+
+
 # TODO: right now, only version 7 of RedHat/Centos is supported
 # In future, update this code to support release 8+
 - name: Run configure (RedHat, Python 3.10+)
@@ -101,7 +177,7 @@
     # Note, on Centos 7, due to old version of GCC, we cannot use --enable-optimizations option
     # TODO: try to install devtoolset-11-gcc* and compile with a newer GCC
     - name: Run configure
-      command: ./configure --enable-shared --prefix={{ python_install_dir }}
+      shell: scl enable devtoolset-11 -- ./configure --enable-optimizations --enable-shared --prefix={{ python_install_dir }}
       args:
         chdir: "{{ python_src_dir_path }}"
         creates: "{{ python_src_dir_path }}/Makefile"
@@ -109,6 +185,12 @@
       environment:
         CPPFLAGS: "{{ openssl11_cflags.stdout }}"
         LDFLAGS: "{{ openssl11_libs.stdout }} -Wl,-rpath {{ python_install_dir}}/lib"
+
+    - name: Run make
+      shell: scl enable devtoolset-11 -- make -j{{ ansible_processor_cores }}
+      args:
+        chdir: "{{ python_src_dir_path }}"
+        creates: "{{ python_src_dir_path }}/python"
       
   when: 
     - ansible_os_family == "RedHat"
@@ -128,11 +210,15 @@
     # - (ansible_distribution_major_version is version('7', '>') or python_version is version('3.9', '<='))
 
 
-- name: Run make
+- name: Run make (default) | RedHat
   command: make -j{{ ansible_processor_cores }}
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/python"
+  when:
+    - ansible_os_family == "RedHat"
+    - python_version is version('3.9', '<=')
+
 
 
 - name: Run make altinstall
