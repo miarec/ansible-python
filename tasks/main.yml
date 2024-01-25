@@ -8,11 +8,11 @@
 
 # Install Python3 from package
 - include_tasks: install-package.yml    # noqa name[missing]
-  when: not python_install_from_source
+  when: not python_install_from_source|bool
 
 # Install Python3 from Source code
 - name: Install specified version of Python3 from Source
-  when: python_install_from_source
+  when: python_install_from_source|bool
   block:
     - set_fact:   # noqa name[missing]
         # Translate full python_version (3.4.5) to the MAJOR.MINOR value, like "3.4"
