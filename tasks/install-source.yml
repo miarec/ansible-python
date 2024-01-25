@@ -26,6 +26,7 @@
     - openssl-devel
     - sqlite-devel
     - bzip2-devel
+    - zlib-devel
     - libffi-devel
   when: ansible_os_family == "RedHat"
   become: true
