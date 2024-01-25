@@ -1,29 +1,31 @@
 ---
-- include_vars: "{{ item }}"
+- name: Load Distibutive-specific variables
+  include_vars: "{{ item }}"
   with_first_found:
     - "../vars/{{ ansible_distribution }}-{{ ansible_distribution_major_version}}.yml"
     - "../vars/{{ ansible_distribution }}.yml"
     - "../vars/{{ ansible_os_family }}.yml"
 
 # Install Python3 from package
-- include_tasks: install-package.yml
+- include_tasks: install-package.yml    # noqa name[missing]
   when: not python_install_from_source
 
 # Install Python3 from Source code
 - name: Install specified version of Python3 from Source
+  when: python_install_from_source
   block:
-    - set_fact:
+    - set_fact:   # noqa name[missing]
         # Translate full python_version (3.4.5) to the MAJOR.MINOR value, like "3.4"
         python_version_base: "{{ python_version|regex_replace('(\\d+\\.\\d+)\\..*$', '\\1') }}"
       when: ansible_version.major >= 2
 
-    - set_fact:
+    - set_fact:    # noqa name[missing]
         # Translate full python_version (3.4.5) to the MAJOR.MINOR value, like "3.4"
         # Prior to ansible 2.0, you needed to escape backreferences (e.g. \\1) with 4 backslashes (\\\\)
         python_version_base: "{{ python_version|regex_replace('(\\d+\\.\\d+)\\..*$', '\\\\1') }}"
       when: ansible_version.major < 2
 
-    - set_fact:
+    - set_fact:   # noqa name[missing]
         python_exec: "python{{ python_version_base }}"
 
     - name: check if python version {{ python_version }} installed
@@ -33,10 +35,6 @@
       ignore_errors: true
       changed_when: false
 
-    - include_tasks: dependencies.yml
+    - include_tasks: install-source.yml    # noqa name[missing]
       when: python_force_install|bool or python_exists.rc != 0
 
-    - include_tasks: install-source.yml
-      when: python_force_install|bool or python_exists.rc != 0
-
-  when: python_install_from_source

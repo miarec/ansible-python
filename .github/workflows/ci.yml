@@ -17,32 +17,33 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Run yamllint
-        uses: karancode/yamllint-github-action@master
-        with:
-          yamllint_strict: false
-          yamllint_comment: false
-          yamllint_config_filepath: '.yamllint'
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint-action@v6
 
   test1:
     name: molecule(source)
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         distro:
+          - centos7
+          - rockylinux8
+          - rockylinux9
           - ubuntu2004
           - ubuntu2204
-          - centos7
         python_version:
-          - 3.8.16
-          - 3.10.13
-          - 3.11.7
-        exclude:
-          # Exclude from testing version of python that match system's python version
-          - distro: ubuntu2004
-            python_version: 3.8.16
-          - distro: ubuntu2204
-            python_version: 3.10.13
+          - "3.8.16"
+          - "3.9.18"
+          - "3.10.13"
+          - "3.11.7"
+          - "3.12.1"
+
+        include:
+          # For Centos 7 only, build Python 3.6
+          - distro: centos7
+            python_version: "3.6.10"
+
 
     steps:
       - name: Check out the Repository
@@ -71,11 +72,14 @@ jobs:
     name: molecule(package)
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         distro:
+          - centos7
+          - rockylinux8
+          - rockylinux9
           - ubuntu2004
           - ubuntu2204
-          - centos7
 
     steps:
       - name: Check out the Repository.

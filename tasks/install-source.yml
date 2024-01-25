@@ -1,4 +1,104 @@
 ---
+- name: Install build dependencies | Debian
+  package:
+    pkg: "{{ item }}"
+    update_cache: true
+    cache_valid_time: 86400
+    state: present
+  with_items:
+    - gcc
+    - make
+    - libssl-dev
+    - libsqlite3-dev
+    - libbz2-dev
+    - libffi-dev
+    - python3-pip
+  when: ansible_os_family == "Debian"
+  become: true
+
+- name: Install build dependencies | RedHat
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - gcc
+    - make
+    - openssl-devel
+    - sqlite-devel
+    - bzip2-devel
+    - zlib-devel
+    - libffi-devel
+  when: ansible_os_family == "RedHat"
+  become: true
+
+
+# Additional dependencies for Centos/RedHat 7,
+# which has very old GCC and OpenSSL.
+#
+# -----------------------------------------------------
+# OpenSSL
+# -----------------------------------------------------
+# OpenSSL 1.1.1+ is required for Python 3.10+
+#  - Centos/RedHat 7 has system OpenSSL 1.0.2 (too old)
+#  - RedHat/Rocky 8 has system OpenSSL 1.1.1 (good)
+#  - RedHat/Rocky 9 has system OpenSSL 3.0 (good)
+#
+# -----------------------------------------------------
+# GCC
+# -----------------------------------------------------
+# On Centos 7, it is necessary to upgrade GCC to a newer version.
+# Otherwise, it is not possible to compile python with --enable-optimizations option.
+# New GCC version is included in DevToolset
+
+- name: For RedHat 7, install additional build dependencies
+  when: 
+    - ansible_os_family == "RedHat"
+    - ansible_distribution_major_version == '7'
+    - python_version is version('3.8', '>=')
+  block:
+    # SCL are required for dev-toolset-11 package
+    # For RedHat Enterprise, you may need to manually add it with:
+    #    yum-config-manager --enable rhel-server-rhscl-11-rpms
+    - name: Install Software Collections (SCL) | CentOS 7
+      package:
+        name: centos-release-scl
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    - name: Install build dependencies | RedHat 7
+      package:
+        name: "{{ item }}"
+        state: present
+      become: true
+      with_items:
+        - devtoolset-11
+        - openssl11-devel
+
+    - name: Get OpenSSL 1.1.1 CFLAGS | RedHat 7    # noqa command-instead-of-shell
+      shell: pkg-config --cflags openssl11
+      register: openssl11_cflags
+      changed_when: false
+
+    - name: Get OpenSSL 1.1.1 LIBS | RedHat 7    # noqa command-instead-of-shell
+      shell: pkg-config --libs openssl11
+      register: openssl11_libs
+      changed_when: false
+
+    - name: Prepare python compile flags | RedHat 7
+      set_fact:
+        python_cppflags: "{{ openssl11_cflags.stdout }}"
+        python_ldflags: "{{ openssl11_libs.stdout }}"
+        python_configure_command: "scl enable devtoolset-11 -- ./configure"
+        python_make_command: "scl enable devtoolset-11 -- make"
+
+
+- name: Install GnuPG
+  package:
+    name: gnupg
+    state: present
+  when: python_verify_gpg_signature|bool
+  become: true
+
 - name: Check python signing key for the requested version {{ python_version_base }}
   fail:
     msg: >
@@ -27,9 +127,10 @@
   ignore_errors: true
   when:
     - python_verify_gpg_signature|bool
+  changed_when: gpg_key_imported.rc != 0
 
 
-- name: Copy python signing key
+- name: Copy python signing key   # noqa risky-file-permissions
   copy:
     src: "files/{{ python_gpg_key_id }}.key"
     dest: "{{ python_download_dir }}/{{ python_gpg_key_id }}.key"
@@ -40,15 +141,16 @@
   when:
     - python_verify_gpg_signature|bool
     - gpg_key_imported.rc != 0
+  changed_when: gpg_key_imported.rc != 0
 
 
-- name: Download python source code
+- name: Download python source code    # noqa risky-file-permissions
   get_url:
     url: "{{ python_download_url }}"
     dest: "{{ python_src_pkg_path }}"
 
 
-- name: Download python tarbal signature
+- name: Download python tarbal signature    # noqa risky-file-permissions
   get_url:
     url: "{{ python_download_url }}.asc"
     dest: "{{ python_src_pkg_path }}.asc"
@@ -61,12 +163,14 @@
   register: signature_verified
   when:
     - python_verify_gpg_signature|bool
+  changed_when: false
 
 - name: Assert that the tarball signature is verified
   assert:
     that: "signature_verified.rc == 0"
   when:
     - python_verify_gpg_signature|bool
+  changed_when: false
 
 
 - name: Untar the source package
@@ -76,64 +180,24 @@
     creates: "{{ python_src_dir_path }}/configure"
     copy: false
 
-- name: Run configure (Debian)
-  command: ./configure --enable-optimizations --enable-shared --prefix={{ python_install_dir }}
+
+- name: Run configure    # noqa command-instead-of-shell
+  shell: "{{ python_configure_command | default('./configure') }} --enable-optimizations --enable-shared --prefix={{ python_install_dir }}"
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/Makefile"
+
   environment:
-    LDFLAGS: "-Wl,-rpath {{ python_install_dir}}/lib"
-  when: 
-    - ansible_os_family == "Debian"
-
-# TODO: right now, only version 7 of RedHat/Centos is supported
-# In future, update this code to support release 8+
-- name: Run configure (RedHat, Python 3.10+)
-  block:
-    - name: Get openssl11 location
-      shell: pkg-config --cflags openssl11
-      register: openssl11_cflags
-
-    - name: Get openssl11 location
-      shell: pkg-config --libs openssl11
-      register: openssl11_libs
-
-    # Note, on Centos 7, due to old version of GCC, we cannot use --enable-optimizations option
-    # TODO: try to install devtoolset-11-gcc* and compile with a newer GCC
-    - name: Run configure
-      command: ./configure --enable-shared --prefix={{ python_install_dir }}
-      args:
-        chdir: "{{ python_src_dir_path }}"
-        creates: "{{ python_src_dir_path }}/Makefile"
-
-      environment:
-        CPPFLAGS: "{{ openssl11_cflags.stdout }}"
-        LDFLAGS: "{{ openssl11_libs.stdout }} -Wl,-rpath {{ python_install_dir}}/lib"
-      
-  when: 
-    - ansible_os_family == "RedHat"
-    - python_version is version('3.10', '>=')
-    # - ansible_distribution_major_version is version('7', '<=')
-      
-- name: Run configure (RedHat, Python 3.9 and older)
-  command: ./configure --enable-shared --prefix={{ python_install_dir }}
-  args:
-    chdir: "{{ python_src_dir_path }}"
-    creates: "{{ python_src_dir_path }}/Makefile"
-  environment:
-    LDFLAGS: "-Wl,-rpath {{ python_install_dir}}/lib"
-  when:
-    - ansible_os_family == "RedHat"
-    - python_version is version('3.9', '<=')
-    # - (ansible_distribution_major_version is version('7', '>') or python_version is version('3.9', '<='))
+    CPPFLAGS: "{{ python_cppflags | default('') }}"
+    LDFLAGS: "{{ python_ldflags | default('') }} -Wl,-rpath {{ python_install_dir }}/lib"
 
 
-- name: Run make
-  command: make -j{{ ansible_processor_cores }}
+- name: Run make    # noqa command-instead-of-shell
+  shell: "{{ python_make_command | default('make') }}  -j{{ ansible_processor_cores }}"
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/python"
-
+      
 
 - name: Run make altinstall
   command: make altinstall
@@ -146,7 +210,7 @@
   become: true
 
 
-- name: Run make altinstall | Force
+- name: Run make altinstall | Force   # noqa no-changed-when
   command: make altinstall
   args:
     chdir: "{{ python_src_dir_path }}"
@@ -157,10 +221,13 @@
 
 
 - name: Add {{ python_install_dir }}/lib directory to ld.so.conf
-  lineinfile: dest=/etc/ld.so.conf line='{{ python_install_dir }}/lib'
+  lineinfile: 
+    dest: /etc/ld.so.conf 
+    line: '{{ python_install_dir }}/lib'
   notify:
     - reload ldconfig
   become: true
+
 
 - name: Clean up the source files
   file:
