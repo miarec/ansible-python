@@ -29,16 +29,21 @@ jobs:
         distro:
           - centos7
           - rockylinux8
-          - rockylinux9
+          #- rockylinux9
           - ubuntu2004
           - ubuntu2204
         python_version:
-          - "3.6.10"
           - "3.8.16"
           - "3.9.18"
           - "3.10.13"
           - "3.11.7"
           - "3.12.1"
+
+        include:
+          # For Centos 7 only, build Python 3.6
+          - distro: centos7
+            python_version: "3.6.10"
+
 
     steps:
       - name: Check out the Repository
@@ -72,7 +77,7 @@ jobs:
         distro:
           - centos7
           - rockylinux8
-          - rockylinux9
+          # - rockylinux9
           - ubuntu2004
           - ubuntu2204
 
