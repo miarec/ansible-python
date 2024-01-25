@@ -26,40 +26,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Centos 7 has builtin Python 3.6, but it is not installed by default
-          - distro: centos7
-            python_version: 3.6.10
-          - distro: centos7
-            python_version: 3.8.16
-          - distro: centos7
-            python_version: 3.9.18
-          - distro: centos7
-            python_version: 3.10.13
-          - distro: centos7
-            python_version: 3.11.7
-          - distro: centos7
-            python_version: 3.12.1
-
-          # Ubuntu 20.04 has system Python 3.8 (must be skipped)
-          - distro: ubuntu2004
-            python_version: 3.9.18
-          - distro: ubuntu2004
-            python_version: 3.10.13
-          - distro: ubuntu2004
-            python_version: 3.11.7
-          - distro: ubuntu2004
-            python_version: 3.12.1
-
-          # Ubuntu 22.04 has system Python 3.10 (must be skipped)
-          - distro: ubuntu2204
-            python_version: 3.8.16
-          - distro: ubuntu2204
-            python_version: 3.9.18
-          - distro: ubuntu2204
-            python_version: 3.11.7
-          - distro: ubuntu2204
-            python_version: 3.12.1
+        distro:
+          - centos7
+          - rockylinux8
+          - rockylinux9
+          - ubuntu2004
+          - ubuntu2204
+        python_version:
+          - "3.6.10"
+          - "3.8.16"
+          - "3.9.18"
+          - "3.10.13"
+          - "3.11.7"
+          - "3.12.1"
 
     steps:
       - name: Check out the Repository
@@ -87,13 +66,15 @@ jobs:
   test2:
     name: molecule(package)
     runs-on: ubuntu-latest
-    fail-fast: false
     strategy:
+      fail-fast: false
       matrix:
         distro:
+          - centos7
+          - rockylinux8
+          - rockylinux9
           - ubuntu2004
           - ubuntu2204
-          - centos7
 
     steps:
       - name: Check out the Repository.
