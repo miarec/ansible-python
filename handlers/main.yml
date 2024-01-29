@@ -1,5 +1,1 @@
 ---
-- name: reload ldconfig
-  command: ldconfig
-  become: true
-  changed_when: false
