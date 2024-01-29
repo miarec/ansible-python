@@ -189,7 +189,7 @@
 
   environment:
     CPPFLAGS: "{{ python_cppflags | default('') }}"
-    LDFLAGS: "{{ python_ldflags | default('') }} -Wl,-rpath {{ python_install_dir }}/lib"
+    LDFLAGS: "{{ python_ldflags | default('') }} -Wl,-rpath={{ python_install_dir }}/lib"
 
 
 - name: Run make    # noqa command-instead-of-shell
