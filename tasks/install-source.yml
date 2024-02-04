@@ -134,6 +134,8 @@
   copy:
     src: "files/{{ python_gpg_key_id }}.key"
     dest: "{{ python_download_dir }}/{{ python_gpg_key_id }}.key"
+  when:
+    - python_verify_gpg_signature|bool
 
 
 - name: Import python signing key into GPG
