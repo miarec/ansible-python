@@ -23,6 +23,7 @@
   with_items:
     - gcc
     - make
+    - findutils
     - openssl-devel
     - sqlite-devel
     - bzip2-devel
