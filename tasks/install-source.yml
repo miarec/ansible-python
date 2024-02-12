@@ -51,7 +51,7 @@
 # New GCC version is included in DevToolset
 
 - name: For RedHat 7, install additional build dependencies
-  when: 
+  when:
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version == '7'
     - python_version is version('3.8', '>=')
@@ -62,6 +62,13 @@
     - name: Install Software Collections (SCL) | CentOS 7
       package:
         name: centos-release-scl
+        state: present
+      when: ansible_distribution == "CentOS"
+
+    # EPEL is required for openssl11 package
+    - name: Install EPEL | CentOS 7
+      package:
+        name: epel-release
         state: present
       when: ansible_distribution == "CentOS"
 
@@ -199,7 +206,7 @@
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/python"
-      
+
 
 - name: Run make altinstall
   command: make altinstall
