@@ -6,8 +6,8 @@
   with_items:
     - epel-release
   when:
-   - ansible_os_family == "RedHat"
-   - ansible_distribution != "RedHat"
+    - ansible_os_family == "RedHat"
+    - ansible_distribution != "RedHat"
 
 # Install python from package
 - name: Install Python3 packages
