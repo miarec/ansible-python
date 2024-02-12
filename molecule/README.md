@@ -20,7 +20,10 @@ MOLECULE_DISTRO=centos7 molecule test
     - `ubuntu2204`
     - `ubuntu2004`
     - `centos7`
- - `MOLECULE_PYTHON_VERSION` defines variable `python_version`, default `3.8.16`
+    - `rhel7`
+    - `rhel8`
+    - `rhel9`
+ - `MOLECULE_PYTHON_VERSION` defines variable `python_version`, default `3.11.7`
 
 
 ## Scenario - `install-from-repo`
@@ -42,3 +45,6 @@ MOLECULE_DISTRO=centos7 MOLECULE_PYTHON_VERSION=3.6.10 molecule test
     - `ubuntu2204`
     - `ubuntu2004`
     - `centos7`
+    - `rhel7`
+    - `rhel8`
+    - `rhel9`
