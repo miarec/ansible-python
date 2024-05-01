@@ -23,6 +23,7 @@
   with_items:
     - gcc
     - make
+    - findutils
     - openssl-devel
     - sqlite-devel
     - bzip2-devel
@@ -51,7 +52,7 @@
 # New GCC version is included in DevToolset
 
 - name: For RedHat 7, install additional build dependencies
-  when: 
+  when:
     - ansible_os_family == "RedHat"
     - ansible_distribution_major_version == '7'
     - python_version is version('3.8', '>=')
@@ -64,6 +65,29 @@
         name: centos-release-scl
         state: present
       when: ansible_distribution == "CentOS"
+
+    # EPEL is required for openssl11 package
+    - name: Install EPEL | CentOS 7
+      package:
+        name: epel-release
+        state: present
+      when: ansible_distribution == "CentOS"
+
+
+    - name: Install EPEL | RedHat 7
+      when: ansible_distribution == "RedHat"
+      block:
+
+        - name: Import EPEL GPG key | RedHat
+          rpm_key:
+            key: "http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+            state: present
+
+        - name: Install EPEL | RedHat
+          package:
+            name: "https://dl.fedoraproject.org/pub/epel/epel-release-latest-{{ ansible_distribution_major_version }}.noarch.rpm"
+            state: present
+
 
     - name: Install build dependencies | RedHat 7
       package:
@@ -199,7 +223,7 @@
   args:
     chdir: "{{ python_src_dir_path }}"
     creates: "{{ python_src_dir_path }}/python"
-      
+
 
 - name: Run make altinstall
   command: make altinstall
