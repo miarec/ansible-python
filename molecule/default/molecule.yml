@@ -19,6 +19,7 @@ provisioner:
     converge: ${MOLECULE_PLAYBOOK:-converge.yml}
   env:
     PYTHON_VERSION: ${MOLECULE_PYTHON_VERSION:-3.11.7}
+    ANSIBLE_VERBOSITY: ${MOLECULE_ANSIBLE_VERBOSITY:-0}
 
 verifier:
   name: testinfra

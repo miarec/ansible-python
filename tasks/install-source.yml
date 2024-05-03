@@ -198,20 +198,30 @@
     - python_verify_gpg_signature|bool
   changed_when: false
 
+# In some cases, unarchive will change permissions of destination folder,
+# to prevent permissions issues with directories that might be shared, like /tmp
+# we will create a direcoty specific to this role to extract files to
+- name: Create directory for extracted files
+  file:
+    path: "{{ python_download_dir }}/Python-{{ python_version }}"
+    state: directory
+    mode: u=rwX,g=rX,o=rX
+  register: _extract_dir
 
 - name: Untar the source package
   unarchive:
     src: "{{ python_src_pkg_path }}"
-    dest: "{{ python_download_dir }}"
-    creates: "{{ python_src_dir_path }}/configure"
+    dest: "{{ _extract_dir.path }}"
+    # creates: "{{ python_src_dir_path }}/configure"
+    creates: "{{ _extract_dir.path }}/Python-{{ python_version }}/configure"
     copy: false
 
 
 - name: Run configure    # noqa command-instead-of-shell
   shell: "{{ python_configure_command | default('./configure') }} --enable-optimizations --enable-shared --prefix={{ python_install_dir }}"
   args:
-    chdir: "{{ python_src_dir_path }}"
-    creates: "{{ python_src_dir_path }}/Makefile"
+    chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
+    creates: "{{ _extract_dir.path }}/Python-{{ python_version }}/Makefile"
 
   environment:
     CPPFLAGS: "{{ python_cppflags | default('') }}"
@@ -221,14 +231,14 @@
 - name: Run make    # noqa command-instead-of-shell
   shell: "{{ python_make_command | default('make') }}  -j{{ ansible_processor_cores }}"
   args:
-    chdir: "{{ python_src_dir_path }}"
-    creates: "{{ python_src_dir_path }}/python"
+    chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
+    creates: "{{ _extract_dir.path }}/Python-{{ python_version }}/python"
 
 
 - name: Run make altinstall
   command: make altinstall
   args:
-    chdir: "{{ python_src_dir_path }}"
+    chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
     creates: "{{ python_install_dir }}/bin/{{ python_exec }}"
   when: not python_force_install|bool
   become: true
@@ -237,7 +247,7 @@
 - name: Run make altinstall | Force   # noqa no-changed-when
   command: make altinstall
   args:
-    chdir: "{{ python_src_dir_path }}"
+    chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
   when: python_force_install|bool
   become: true
 
@@ -249,7 +259,7 @@
   with_items:
     - "{{ python_src_pkg_path }}"
     - "{{ python_src_pkg_path }}.asc"
-    - "{{ python_src_dir_path }}"
+    - "{{ _extract_dir.path }}"
   # ignore_errors: true
   when: python_cleanup_downloads|bool
   become: true
