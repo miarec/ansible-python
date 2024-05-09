@@ -7,32 +7,6 @@
     - set_fact:
         python_install_from_source: false
 
-    # packages `python3 ` and `python3-devel` are not available in UBI repositories
-    # in RHEL 7, they would be available in `rhel-7-server-rpms` and `rhel-7-server-optional-rpms`
-    # Adding CentOS BaseOS repository, so that packages can be installed during molecule test
-    - name: Install dependencies from CentOS Repositories | RHEL 7+
-      when:
-       - ansible_distribution == "RedHat"
-       - ansible_distribution_major_version == "7"
-      block:
-        - set_fact:
-            _tmp_repos:
-              - name: base
-                url: http://mirror.centos.org/centos/7/os/x86_64/
-                gpg: http://mirror.centos.org/centos/7/os/x86_64/RPM-GPG-KEY-CentOS-7
-
-        - name: Add Temporary Repositories | RHEL
-          yum_repository:
-              name: "{{ item.name }}"
-              description: "Centos {{ ansible_distribution_major_version }} - {{ item.name }}"
-              baseurl: "{{ item.url }}"
-              enabled: true
-              gpgkey: "{{ item.gpg }}"
-          with_items: "{{ _tmp_repos }}"
-          loop_control:
-            label: "{{ item.name }}"
-
-
     - name: Install prerequisites
       block:
         - name: Update apt cache
