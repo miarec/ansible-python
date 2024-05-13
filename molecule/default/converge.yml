@@ -8,48 +8,16 @@
         python_install_from_source: true
         python_version: "{{ lookup('env', 'PYTHON_VERSION') }}"
 
-    # package `bzip2-devel` and `devtoolset-11` are not available on UBI7
-    # on RHEL7, they would be available via `rhel-7-server-rpms` and `rhel-7-seerver-rhscl`
-    - name: Install dependencies from CentOS Repositories | RHEL 7+
+    # in RHEL7, devtoolset-11 is available via `rhel-7-seerver-rhscl`,
+    # since we are installing packages from CentOS repositories,
+    # we have to install centos-release-scl
+    - name: Install dependencies | RHEL 7+
+      yum:
+        name: centos-release-scl
+        state: present
       when:
-       - ansible_distribution == "RedHat"
-       - ansible_distribution_major_version == "7"
-      block:
-
-        - set_fact:
-            _tmp_repos:
-              - name: base
-                url: http://mirror.centos.org/centos/7/os/x86_64/
-              - name: sclo
-                url: http://mirror.centos.org/centos/7/sclo/x86_64/rh/
-
-            _tmp_packages:
-              - name: bzip2-devel
-                repo: base
-              - name: devtoolset-11
-                repo: sclo, base
-
-        - name: Add Temporary Repositories | RHEL
-          yum_repository:
-              name: "{{ item.name }}"
-              description: "Centos {{ ansible_distribution_major_version }} - {{ item.name }}"
-              baseurl: "{{ item.url }}"
-              enabled: false
-          with_items: "{{ _tmp_repos }}"
-          loop_control:
-            label: "{{ item.name }}"
-
-        - name: Install missing packages | RHEL
-          yum:
-            name: "{{ item.name }}"
-            state: present
-            enablerepo: "{{ item.repo }}"
-            disable_gpg_check: true
-          with_items: "{{ _tmp_packages }}"
-          loop_control:
-            label: "{{ item.name }}"
-
-
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "7"
 
     - name: Install prerequisites
       block:
