@@ -13,12 +13,48 @@
     # since we are installing packages from CentOS repositories,
     # we have to install centos-release-scl
     - name: Install dependencies | RHEL 7+
-      yum:
-        name: centos-release-scl
-        state: present
       when:
         - ansible_distribution == "RedHat"
         - ansible_distribution_major_version == "7"
+      block:
+
+        - name: Install SCL
+          yum:
+            name: centos-release-scl
+            state: present
+
+        - name: Comment out mirrorlist lines
+          replace:
+            path: "{{ item }}"
+            regexp: '^mirrorlist'
+            replace: '#mirrorlist'
+          with_items:
+            - "/etc/yum.repos.d/CentOS-SCLo-scl.repo"
+            - "/etc/yum.repos.d/CentOS-SCLo-scl-rh.repo"
+
+        - name: Replace baseurl with vault URL
+          replace:
+            path: "{{ item }}"
+            regexp: '^#\s*baseurl=http://mirror.centos.org'
+            replace: 'baseurl=http://vault.centos.org'
+          with_items:
+            - "/etc/yum.repos.d/CentOS-SCLo-scl.repo"
+            - "/etc/yum.repos.d/CentOS-SCLo-scl-rh.repo"
+
+    # Removing `openssl-fips-provider` from RHEL9
+    # This is needed to install `openssl-devel`
+    # RHEL 9 and Rocky 9 handle FIPS diferently in openssl,
+    # RHEL has a seperate package for the FIPS provider, in Rocky9 FIPS is included in openssl
+    # as a result there are some conflicting files, specifically /usr/lib64/ossl-modules/fips.so
+    # Because we are using rocky repos for RHEL9 in molecule, we most remove the conficting package
+    # https://forums.rockylinux.org/t/issue-with-openssl-fips-provider-during-migration-from-rhel-9/15290/3
+    - name: remove openssl-fips-provider | RHEL9
+      yum:
+        name: openssl-fips-provider
+        state: absent
+      when:
+        - ansible_distribution == "RedHat"
+        - ansible_distribution_major_version == "9"
 
     - name: Install prerequisites
       block:
