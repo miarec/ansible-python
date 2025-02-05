@@ -215,6 +215,20 @@
     creates: "{{ _extract_dir.path }}/Python-{{ python_version }}/configure"
     copy: false
 
+# Custom solution for python3.6.15 https://stackoverflow.com/a/75916354/24889773
+- name: Copy alignment patch for python-3.6.15
+  copy:
+    src: "files/python3.6-alignment.patch"
+    dest: "{{ _extract_dir.path }}/Python-{{ python_version }}/alignment.patch"
+  when:
+    - python_version==3.6.15
+
+- name: Apply patch
+  shell: "patch -p0 < alignment.patch"
+  args: 
+    chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
+  when:
+    - python_version==3.6.15
 
 - name: Run configure    # noqa command-instead-of-shell
   shell: "{{ python_configure_command | default('./configure') }} --enable-optimizations --enable-shared --prefix={{ python_install_dir }}"
