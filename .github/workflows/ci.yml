@@ -28,6 +28,32 @@ jobs:
       - name: Run ansible-lint
         run: uv run ansible-lint
 
+  test-package:
+    name: molecule(package)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu2204
+          - ubuntu2404
+          - rockylinux9
+          - rhel9
+
+    steps:
+      - name: Check out the Repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Run molecule tests
+        run: uv run molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
+
   test-source:
     name: molecule(source)
     runs-on: ubuntu-22.04
@@ -53,35 +79,9 @@ jobs:
         uses: astral-sh/setup-uv@v4
 
       - name: Run molecule test
-        run: uv run molecule test
+        run: uv run molecule test -s install-from-source
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
           MOLECULE_PYTHON_VERSION: ${{ matrix.python_version }}
-
-  test-package:
-    name: molecule(package)
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-      matrix:
-        distro:
-          - ubuntu2204
-          - ubuntu2404
-          - rockylinux9
-          - rhel9
-
-    steps:
-      - name: Check out the Repository
-        uses: actions/checkout@v4
-
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v4
-
-      - name: Run molecule tests, install from Package
-        run: uv run molecule test -s install-from-repo
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DISTRO: ${{ matrix.distro }}
