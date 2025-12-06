@@ -1,14 +1,15 @@
 # ansible-python
 ![CI](https://github.com/miarec/ansible-python/actions/workflows/ci.yml/badge.svg?event=push)
 
-Ansible role for installing a particular version of Python from source.
+Ansible role for installing Python from system packages or from source.
 
 
 Role Variables
 --------------
 
-- `python_version`: The version of python to install
-- `python_verify_gpg_signature`: If enabled, then GPG signature is verified for the downloaded tarball.
+- `python_install_from_source`: Install from source if `true`, from package if `false` (default: `false`)
+- `python_version`: The version of python to install (only used when installing from source)
+- `python_verify_gpg_signature`: If enabled, then GPG signature is verified for the downloaded tarball
 - `python_gpg_key_id`: GPG key id used to sign python tarball, optional. The known keys are stored in vars/main.yml. You need to set this option only if the requested python version is not known yet.
 - `python_force_install`: Install again even if the specified version is already found
 
@@ -16,19 +17,28 @@ Role Variables
 Example Playbook
 ----------------
 
-eg:
+Install Python from system packages (default):
 
 ``` yaml
     - name: Install python
       hosts: localhost
-      become: yes
+      become: true
       roles:
         - role: ansible-python
-          python_version: 3.5.3
-          python_verify_gpg_signature: true
 ```
 
-The above playbook will install python version 3.5.3.
+Install a specific Python version from source:
+
+``` yaml
+    - name: Install python
+      hosts: localhost
+      become: true
+      roles:
+        - role: ansible-python
+          python_install_from_source: true
+          python_version: 3.11.7
+          python_verify_gpg_signature: true
+```
 
 The role can be used multiple times with different value of
 `python_version` to install different versions. This can be useful for
@@ -36,5 +46,44 @@ setting up an environment for testing a python lib against multiple
 versions by using tox for eg.
 
 
+## Testing
 
+This role uses [Molecule](https://molecule.readthedocs.io/) with Docker for testing.
+[uv](https://docs.astral.sh/uv/) is used for dependency management.
 
+### Prerequisites
+
+- Docker
+- uv (install via `curl -LsSf https://astral.sh/uv/install.sh | sh`)
+
+### Running Tests
+
+```bash
+# Run default test suite (install from package)
+uv run molecule test
+
+# Run install from source scenario
+uv run molecule test -s install-from-source
+
+# Test against specific distro
+MOLECULE_DISTRO=ubuntu2404 uv run molecule test
+MOLECULE_DISTRO=rockylinux9 uv run molecule test
+
+# Test specific Python version (source scenario only)
+MOLECULE_DISTRO=ubuntu2404 MOLECULE_PYTHON_VERSION=3.11.7 uv run molecule test -s install-from-source
+```
+
+### Available Distros
+
+| Distribution   | Variable Value  |
+|----------------|-----------------|
+| Ubuntu 22.04   | `ubuntu2204`    |
+| Ubuntu 24.04   | `ubuntu2404`    |
+| Rocky Linux 9  | `rockylinux9`   |
+| RHEL 9         | `rhel9`         |
+
+### Linting
+
+```bash
+uv run ansible-lint
+```

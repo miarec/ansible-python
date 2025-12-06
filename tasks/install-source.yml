@@ -13,7 +13,7 @@
     - libbz2-dev
     - libffi-dev
     - python3-pip
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
   become: true
 
 - name: Install build dependencies | RedHat
@@ -29,7 +29,7 @@
     - bzip2-devel
     - zlib-devel
     - libffi-devel
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
   become: true
 
 
@@ -53,8 +53,8 @@
 
 - name: For RedHat 7, install additional build dependencies
   when:
-    - ansible_os_family == "RedHat"
-    - ansible_distribution_major_version == '7'
+    - ansible_facts['os_family'] == "RedHat"
+    - ansible_facts['distribution_major_version'] == '7'
     - python_version is version('3.8', '>=')
   block:
     # SCL are required for dev-toolset-11 package
@@ -64,14 +64,14 @@
       package:
         name: centos-release-scl
         state: present
-      when: ansible_distribution == "CentOS"
+      when: ansible_facts['distribution'] == "CentOS"
 
     # EPEL is required for openssl11 package
     - name: Install EPEL | CentOS 7
       package:
         name: epel-release
         state: present
-      when: ansible_distribution == "CentOS"
+      when: ansible_facts['distribution'] == "CentOS"
 
 
     - name: Install EPEL | RedHat 7
@@ -79,9 +79,9 @@
         name: epel
         description: EPEL
         baseurl: "https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/"
-        gpgkey: "http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_distribution_major_version }}"
+        gpgkey: "http://download.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ ansible_facts['distribution_major_version'] }}"
         enabled: true
-      when: ansible_distribution == "RedHat"
+      when: ansible_facts['distribution'] == "RedHat"
 
 
 
@@ -228,7 +228,7 @@
 
 
 - name: Run make    # noqa command-instead-of-shell
-  shell: "{{ python_make_command | default('make') }}  -j{{ ansible_processor_cores }}"
+  shell: "{{ python_make_command | default('make') }}  -j{{ ansible_facts['processor_cores'] }}"
   args:
     chdir: "{{ _extract_dir.path }}/Python-{{ python_version }}"
     creates: "{{ _extract_dir.path }}/Python-{{ python_version }}/python"

@@ -19,96 +19,69 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
 
-      - name: Run ansible-lint
-        uses: ansible/ansible-lint-action@v6
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
 
-  test1:
-    name: molecule(source)
-    runs-on: ubuntu-latest
+      - name: Install Ansible collections
+        run: uv run ansible-galaxy collection install community.general ansible.posix
+
+      - name: Run ansible-lint
+        run: uv run ansible-lint
+
+  test-package:
+    name: molecule(package)
+    runs-on: ubuntu-22.04
     strategy:
       fail-fast: false
       matrix:
         distro:
-          - centos7
-          - rockylinux8
-          - rockylinux9
-          - ubuntu2004
           - ubuntu2204
           - ubuntu2404
-          - rhel7
-          - rhel8
+          - rockylinux9
           - rhel9
-        python_version:
-          - "3.8.16"
-          - "3.9.18"
-          - "3.10.13"
-          - "3.11.7"
-          - "3.12.1"
-
-        include:
-          # For Centos 7 only, build Python 3.6
-          - distro: centos7
-            python_version: "3.6.10"
-
 
     steps:
       - name: Check out the Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python3
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
 
-      - name: Install test dependencies
-        run: pip3 install -r molecule/default/test-requirements.txt
+      - name: Run molecule tests
+        run: uv run molecule test
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+          MOLECULE_DISTRO: ${{ matrix.distro }}
 
-      - name: Install Ansible dependencies.
-        run: ansible-galaxy collection install community.docker ansible.posix --force
+  test-source:
+    name: molecule(source)
+    runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        distro:
+          - ubuntu2204
+          - ubuntu2404
+          - rockylinux9
+          - rhel9
+        python_version:
+          - "3.9.18"
+          - "3.10.13"
+          - "3.11.7"
+          - "3.12.1"
+
+    steps:
+      - name: Check out the Repository
+        uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v4
 
       - name: Run molecule test
-        run: molecule test
+        run: uv run molecule test -s install-from-source
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
           MOLECULE_DISTRO: ${{ matrix.distro }}
           MOLECULE_PYTHON_VERSION: ${{ matrix.python_version }}
-
-  test2:
-    name: molecule(package)
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        distro:
-          - centos7
-          - rockylinux8
-          - rockylinux9
-          - ubuntu2004
-          - ubuntu2204
-          - ubuntu2404
-          - rhel7
-          - rhel8
-          - rhel9
-
-    steps:
-      - name: Check out the Repository.
-        uses: actions/checkout@v4
-
-      - name: Set up Python3.
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install test dependencies.
-        run: pip3 install -r molecule/default/test-requirements.txt
-
-      - name: Install Ansible dependencies.
-        run: ansible-galaxy collection install community.docker ansible.posix --force
-
-      - name: Run molecule tests., install from Package
-        run: molecule test -s install-from-repo
-        env:
-          PY_COLORS: '1'
-          ANSIBLE_FORCE_COLOR: '1'
-          MOLECULE_DISTRO: ${{ matrix.distro }}
